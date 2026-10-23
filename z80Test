@@ -1,0 +1,69 @@
+; Program Name: ARROW
+; Author(s): Karol
+; Description: Getting the hang of _GetKey
+
+.nolist
+#include "ti83plus.inc" ;include statement
+.list
+
+.org userMem - 2 ;stating usermemory starts in 'header'
+.db $BB,$6D ;write in header
+
+start:
+	
+	bcall(_ClrLCDFull) ;clear screen
+	LD A, 0
+	LD (CurCol), A
+	LD A, 0
+	LD (CurRow), A
+
+	bcall(_GetKey) ;pauses prog until key press, enters key code into HL
+	
+	CP $02 ;takeaway 02(hex) from HL
+	JP z, left ;if result of CP set the "z" flag (answer zero), jump to "left"
+	
+	CP $03
+	JP z, up
+	
+	CP $01
+	JP z, right
+	
+	CP $04
+	JP z, down
+	
+	ret ;return
+	
+left:
+	LD HL, leftar ;load byte  "leftar" into HL
+	bcall(_PutS) ;print HL
+	JP quit ;jump to quit
+up:
+	LD HL, upar
+	bcall(_PutS)
+	JP quit
+right:
+	LD HL, rightar
+	bcall(_PutS)
+	JP quit
+down:
+	LD HL, downar
+	bcall(_PutS)
+	JP quit
+
+
+leftar: ;declarations of variables
+    .db "<", 0
+    
+upar:
+    .db "^", 0
+    
+rightar:
+    .db ">", 0
+    
+downar:
+    .db "V", 0
+
+quit: ;at the end so no other methods get executed (which they will if you don't use this)
+	bcall(_ClrLCDFull) ;clear screen
+
+.end
