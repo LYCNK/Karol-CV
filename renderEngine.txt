@@ -1,0 +1,77 @@
+100->A
+~6->Xmin
+6->Xmax
+~4->Ymin
+4->Ymax
+
+Lbl 1
+1->I
+ClrDraw
+
+Lbl 0
+
+L2(I)->P
+L2(I+1)->Q
+
+L1((3*(P-1))+1)->D
+L1((3*(P-1))+2)->E
+L1((3*(P-1))+3)->F
+
+D->X
+F->Z
+
+((X*cos(theta))+(Z*sin(theta)))->D
+((X*~(sin(theta)))+(Z*cos(theta)))->F
+
+If ((D+F)<=50) and (F>0):Then
+	(D)/(F*tan(A/2))->N
+	(E)/(F*tan(A/2))->O
+End
+
+L1((3*(Q-1))+1)->D
+L1((3*(Q-1))+2)->E
+L1((3*(Q-1))+3)->F
+
+D->X
+F->Z
+
+((X*cos(theta))+(Z*sin(theta)))->D
+((X*~(sin(theta)))+(Z*cos(theta)))->F
+
+If ((D+F)<=50) and (F>0):Then
+	(D)/(F*tan(A/2))->S
+	(E)/(F*tan(A/2))->T
+End
+
+Line(N,O,S,T
+
+If I<(dim(L2)-1:Then
+	I+2->I
+	Goto 0
+End
+
+Lbl 2
+getKey->B
+If B=0
+Goto 2
+If B=24:Then
+	theta-10->theta
+	1->C
+End
+If B=26:Then
+	theta+10->theta
+	1->C
+End
+
+If C=1:Then
+	DelVar I
+	DelVar P
+	DelVar Q
+	DelVar D
+	DelVar E
+	DelVar F
+	DelVar X
+	DelVar Y
+	DelVar C
+	Goto 1
+End
