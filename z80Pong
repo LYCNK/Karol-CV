@@ -1,0 +1,132 @@
+; Program Name: ASMPONG
+; Author(s): Karol
+; Description: MY PONG PROGRAM PORTED TO Z80 ASM!!!
+
+.nolist
+#include "ti83plus.inc"
+.list
+
+; EQUs
+increment .EQU AppBackUpScreen+4
+leftx .EQU AppBackUpScreen+8
+rightx .EQU AppBackUpScreen+12
+leftyold .EQU AppBackUpScreen+16
+rightyold .EQU AppBackUpScreen+20
+; /EQUs
+
+.org userMem-2
+.db $BB,$6D
+
+start:
+    bcall(_ClrLCDFull)
+    
+    ; Initialize paddle positions
+    LD A, 3
+    LD (leftx), A
+    LD A, 93
+    LD (rightx), A
+    LD A, 25
+    LD (increment), A
+    JP main_loop
+
+main_loop:
+    call refresh
+    JP drawline
+    
+eraseleft:
+    ; Start erasing the left paddle
+    LD A, 3
+    LD (leftx), A
+    LD A, (leftyold)
+    LD (increment), A
+    call eraseleftloop
+    ret
+
+eraseright:
+    ; Start erasing the right paddle
+    LD A, 93
+    LD (rightx), A
+    LD A, (rightyold)
+    LD (increment), A
+    call eraserightloop
+    ret
+
+eraseleftloop:
+    ; Erase left paddle loop
+    LD A, (increment)
+    LD C, A
+    LD A, (leftx)
+    LD B, A
+    LD D, 0
+    bcall(_IPoint)
+    
+    INC A
+    LD (increment), A
+    CP 39
+    JR nz, eraseleftloop
+    ret
+
+eraserightloop:
+    ; Erase right paddle loop
+    LD A, (increment)
+    LD C, A
+    LD A, (rightx)
+    LD B, A
+    LD D, 0
+    bcall(_IPoint)
+    
+    INC A
+    LD (increment), A
+    CP 39
+    JR nz, eraserightloop
+    ret
+
+drawline:
+    ; Draw left paddle
+    LD A, 3
+    LD (leftx), A
+    LD A, (increment)
+    LD C, A
+    LD (leftyold), A
+    LD B, A
+    LD D, 1
+    bcall(_IPoint)
+    
+    ; Draw right paddle
+    LD A, (increment)
+    LD C, A
+    LD (rightyold), A
+    LD A, (rightx)
+    LD B, A
+    LD D, 1
+    bcall(_IPoint)
+    
+    ; Move to the next increment
+    INC A
+    LD (increment), A
+    CP 39
+    JP nz, drawline
+    ret
+
+refresh:
+    ; Poll keyboard input and refresh paddles
+    bcall(_GetCSC)
+    
+    ; Check for left paddle movement
+    CP 24           ; Up key for left paddle
+    CALL z, eraseleft
+    CP 22           ; Down key for left paddle
+    CALL z, eraseleft
+    
+    ; Check for right paddle movement
+    CP 14           ; Up key for right paddle
+    CALL z, eraseright
+    CP 12           ; Down key for right paddle
+    CALL z, eraseright
+    
+    ret
+
+quit:
+    bcall(_ClrLCDFull) ; Clear screen and quit program
+    ret
+.end
